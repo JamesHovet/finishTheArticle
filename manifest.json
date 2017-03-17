@@ -7,11 +7,10 @@
 
     "permissions": [
         "activeTab",
-        "https://ajax.googleapis.com/",
         "https://*/"
     ],
     "content_scripts": [{
-        "matches": ["https://medium.com/*", "http://medium.com/*"],
+        "matches": ["https://*/*", "http://*/*"],
         "js": ["action.js"]
     }],
 

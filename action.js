@@ -21,44 +21,61 @@ var stripLinks = function stripLinks(str) {
     extracted = anchors.map(extractHref);
     return extracted
 }
+function cleanup(str){
+    return str.replace(/^\s+|\s+$/g, '');
+}
 
 var extractHref = function extractHref(str) {
     hrefMatch = str.match(HREF_REGEX);
-    console.log(hrefMatch)
     inner = str.match(INNER_HTML_REGEX)[0];
     inner = inner.substring(1, inner.length - 4);
+    inner = cleanup(inner);
     href = hrefMatch[1].substring(6, hrefMatch[1].length - 1);
-    href = href.replace(/http:/, "https:")
+    // href = href.replace(/http:/, "https:")
     return {
         "href" : href,
         "inner" : inner
     }
 }
 
+
 //see "https://medium.com/@girlziplocked/the-crippling-fear-of-medical-poverty-352177059149#.61mqs2g4m"
 
-var getLinks = function getLinks() {
-    var sections = document.getElementsByClassName("section-inner");
-    var links = [];
-    for(var section = 0; section < sections.length; ++section){
-        var node = sections[section];
-        var elementsWithLinks = []
-        // var node = document.body
+// var getLinks = function getLinks() {
+//     var sections = document.getElementsByClassName("section-inner");
+//     var links = [];
+//     for(var section = 0; section < sections.length; ++section){
+//         var node = sections[section];
+//         var elementsWithLinks = []
+//         // var node = document.body
+//
+//         for (var i = 0; i< node.childNodes.length; ++i){
+//             var childInnerHTML = node.childNodes[i].innerHTML;
+//             // console.log(childInnerHTML);
+//             if (childInnerHTML.match(A_HREF)){
+//                 // console.log(childInnerHTML.match(A_HREF));
+//                 elementsWithLinks.push(node.childNodes[i])
+//             }
+//         }
+//
+//         out = elementsWithLinks.map((el) => stripLinks(el.innerHTML))
+//         links = links.concat(out);
+//     }
+//     var merged = [].concat.apply([], links);
+//     return merged;
+// }
 
-        for (var i = 0; i< node.childNodes.length; ++i){
-            var childInnerHTML = node.childNodes[i].innerHTML;
-            // console.log(childInnerHTML);
-            if (childInnerHTML.match(A_HREF)){
-                // console.log(childInnerHTML.match(A_HREF));
-                elementsWithLinks.push(node.childNodes[i])
-            }
-        }
-
-        out = elementsWithLinks.map((el) => stripLinks(el.innerHTML))
-        links = links.concat(out);
+function getLinks() {
+    var articleDivs = document.getElementsByClassName("postArticle-content")
+    if (articleDivs.length > 1) {
+        console.log("too many elements");
+        return null;
+    } else {
+        text = articleDivs[0].innerHTML;
+        anchorMatches = text.match(A_HREF);
+        out = anchorMatches.map(extractHref);
+        return out;
     }
-    var merged = [].concat.apply([], links);
-    return merged;
 }
 
 // function httpGetAsync(theUrl, callback)
@@ -85,6 +102,7 @@ var getLinks = function getLinks() {
 //
 // }
 links = getLinks();
+console.log(links);
 
 chrome.runtime.sendMessage({"links" : links}, function(response) {
   console.log(response.fullLinks);
